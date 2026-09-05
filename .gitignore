@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+target/
+.next/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep the committed template while ignoring local environment files
+!.env.example

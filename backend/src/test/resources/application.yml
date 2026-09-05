@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
+
+jwt:
+  secret: test-only-jwt-secret-must-be-at-least-32-characters
+  expiration: 3600000
+
+storage:
+  endpoint: ${B2_ENDPOINT:https://s3.us-west-004.backblazeb2.com}
+  region: ${B2_REGION:us-west-004}
+  bucket: ${B2_BUCKET:test-bucket}
+  access-key-id: ${B2_ACCESS_KEY_ID:test-key-id}
+  secret-access-key: ${B2_SECRET_ACCESS_KEY:test-secret-key}
+  presigned-url-expiration-minutes: 15
+
+gemini:
+  api-key: ${GEMINI_API_KEY:test-api-key}
+  model: gemini-3.5-flash-lite
+  base-url: https://generativelanguage.googleapis.com
