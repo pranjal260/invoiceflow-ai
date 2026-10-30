@@ -26,6 +26,8 @@ public class GeminiInvoiceExtractionService implements InvoiceExtractionService 
     static final String EXTRACTION_PROMPT =
             "Extract all invoice data from this document. "
             + "Return dates in YYYY-MM-DD format (e.g., 2024-01-15). "
+            + "Return currency as a three-letter ISO 4217 code such as USD, EUR, GBP, or INR; "
+            + "never return a currency symbol. "
             + "If a field cannot be determined from the document, return null for that field. "
             + "For items, extract all line items with their description, quantity, unit price, and amount. "
             + "If there are no line items, return an empty array for items.";

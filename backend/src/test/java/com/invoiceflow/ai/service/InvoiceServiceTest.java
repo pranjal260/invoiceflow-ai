@@ -345,6 +345,46 @@ class InvoiceServiceTest {
     }
 
     @Test
+    void normalizesCurrencySymbolReturnedByAi() {
+        UUID invoiceId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        Invoice invoice = invoiceWithDocument("INV-001");
+        when(invoiceRepository.findByIdAndUserId(invoiceId, userId)).thenReturn(Optional.of(invoice));
+        when(fileStorageService.download(any()))
+                .thenReturn(new FileDownloadResult(new byte[]{0x25}, "application/pdf"));
+        when(invoiceExtractionService.extract(any(), any()))
+                .thenReturn(new InvoiceExtractionResult(
+                        "INV-001", "Extracted Vendor", LocalDate.of(2024, 1, 15), null,
+                        "$", new BigDecimal("100.00"), new BigDecimal("10.00"),
+                        new BigDecimal("110.00"), List.of()));
+        when(invoiceRepository.save(invoice)).thenReturn(invoice);
+
+        invoiceService.extractInvoice(invoiceId, userId);
+
+        assertThat(invoice.getCurrency()).isEqualTo("USD");
+    }
+
+    @Test
+    void rejectsUnknownExtractedCurrencyAsExtractionFailure() {
+        UUID invoiceId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        Invoice invoice = invoiceWithDocument("INV-001");
+        when(invoiceRepository.findByIdAndUserId(invoiceId, userId)).thenReturn(Optional.of(invoice));
+        when(fileStorageService.download(any()))
+                .thenReturn(new FileDownloadResult(new byte[]{0x25}, "application/pdf"));
+        when(invoiceExtractionService.extract(any(), any()))
+                .thenReturn(new InvoiceExtractionResult(
+                        "INV-001", "Extracted Vendor", LocalDate.of(2024, 1, 15), null,
+                        "US DOLLARS", new BigDecimal("100.00"), new BigDecimal("10.00"),
+                        new BigDecimal("110.00"), List.of()));
+
+        assertThatThrownBy(() -> invoiceService.extractInvoice(invoiceId, userId))
+                .isInstanceOf(InvoiceExtractionException.class)
+                .hasMessageContaining("invalid currency");
+        verify(invoiceRepository, never()).save(any());
+    }
+
+    @Test
     void extractionCreatesLineItems() {
         UUID invoiceId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();

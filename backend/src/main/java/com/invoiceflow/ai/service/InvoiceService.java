@@ -26,6 +26,7 @@ import com.invoiceflow.ai.service.storage.FileDownloadResult;
 import com.invoiceflow.ai.service.storage.FileStorageService;
 import com.invoiceflow.ai.service.storage.FileUploadResult;
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -162,11 +163,13 @@ public class InvoiceService {
             throw new DuplicateInvoiceNumberException(result.invoiceNumber());
         }
 
+        String currency = normalizeExtractedCurrency(result.currency());
+
         // Database mutations — atomic within this @Transactional method
         invoice.updateFromExtraction(
                 result.invoiceNumber(), result.vendorName(),
                 result.invoiceDate(), result.dueDate(),
-                result.currency(), result.subtotal(),
+                currency, result.subtotal(),
                 result.taxAmount(), result.totalAmount());
 
         invoiceItemRepository.deleteAllByInvoiceId(invoiceId);
@@ -193,6 +196,26 @@ public class InvoiceService {
                 || result.totalAmount() == null) {
             throw new InvoiceExtractionException("Extraction returned incomplete invoice data.");
         }
+    }
+
+    private String normalizeExtractedCurrency(String currency) {
+        if (currency == null || currency.isBlank()) {
+            throw new InvoiceExtractionException("Extraction returned an invalid currency.");
+        }
+
+        String normalized = currency.trim().toUpperCase(Locale.ROOT);
+        normalized = switch (normalized) {
+            case "$", "US$" -> "USD";
+            case "€" -> "EUR";
+            case "£" -> "GBP";
+            case "₹", "RS", "RS." -> "INR";
+            default -> normalized;
+        };
+
+        if (!normalized.matches("[A-Z]{3}")) {
+            throw new InvoiceExtractionException("Extraction returned an invalid currency.");
+        }
+        return normalized;
     }
 
     private void validateLineItem(InvoiceExtractionResult.LineItem item) {
