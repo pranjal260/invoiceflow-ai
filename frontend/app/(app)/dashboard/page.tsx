@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { FileText, CheckCircle2, Clock, AlertCircle, TrendingUp, TrendingDown, CircleDollarSign, Plus, FolderOpen, BarChart3 } from "lucide-react";
+import { FileText, CheckCircle2, Clock, AlertCircle, TrendingUp, TrendingDown, CircleDollarSign, Plus, FolderOpen, BarChart3, Sparkles, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,9 +53,7 @@ export default function DashboardPage() {
           </h1>
           <p className="mt-1 text-sm text-slate-500">Overview of your invoices and finances.</p>
         </div>
-        <Link href="/invoices/new">
-          <Button className="gap-2"><Plus className="h-4 w-4" /> Create invoice</Button>
-        </Link>
+        <div className="flex flex-wrap gap-2"><Link href="/invoices/new"><Button className="gap-2 rounded-xl bg-indigo-600 shadow-sm hover:bg-indigo-700"><Sparkles className="h-4 w-4" /> Upload with AI</Button></Link><Link href="/invoices/new"><Button variant="secondary" className="gap-2 rounded-xl"><Plus className="h-4 w-4" /> Create manually</Button></Link></div>
       </div>
 
       {loading && (
@@ -92,6 +90,10 @@ export default function DashboardPage() {
 
       {!loading && !error && summaries.length > 0 && (
         <>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-700 via-teal-700 to-indigo-700 p-6 text-white shadow-sm sm:p-7">
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center"><div><p className="text-sm font-medium text-teal-100">Your financial command center</p><h2 className="mt-1 text-2xl font-semibold tracking-tight">Stay ahead of every invoice.</h2><p className="mt-2 max-w-xl text-sm text-teal-50/90">Upload an invoice and let AI prepare the details. You stay in control before anything is saved.</p></div><Link href="/invoices/new"><Button className="w-fit gap-2 rounded-xl bg-white text-teal-800 hover:bg-teal-50">Start with AI <ArrowUpRight className="h-4 w-4" /></Button></Link></div>
+          </div>
+
           {/* Global status overview */}
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard

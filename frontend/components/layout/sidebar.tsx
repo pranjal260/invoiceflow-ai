@@ -35,10 +35,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const displayName = user ? `${user.firstName} ${user.lastName}`.trim() : "Loading user";
 
   return (
-    <aside className="flex h-full w-full flex-col bg-white">
+    <aside className="flex h-full w-full flex-col border-r border-slate-200/80 bg-white">
       {/* Header */}
-      <div className="flex h-16 items-center gap-2 px-6 border-b border-slate-100">
-        <Sparkles className="h-5 w-5 text-teal-600" />
+      <div className="flex h-16 items-center justify-between gap-2 border-b border-slate-100 px-5">
+        <div className="flex items-center gap-2"><div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm"><Sparkles className="h-4 w-4" /></div>
         <Link 
           href="/dashboard" 
           className="font-semibold tracking-tight text-slate-900"
@@ -46,12 +46,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         >
           InvoiceFlow AI
         </Link>
+        </div><span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-indigo-700">AI</span>
       </div>
 
       {/* Navigation */}
       <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-4">
         <div className="px-3">
-          <p className="mb-2 px-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">Main</p>
+          <p className="mb-2 px-4 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">Main</p>
           <div className="space-y-1">
             {mainNavigation.map(({ label, href, icon: Icon }) => {
               const isActive = pathname === href || (href !== "/dashboard" && pathname.startsWith(`${href}/`));
@@ -61,9 +62,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                   href={href}
                   onClick={onClose}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-colors relative",
+                    "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors relative",
                     isActive 
-                      ? "bg-teal-50 font-medium text-teal-700" 
+                      ? "bg-teal-50 font-semibold text-teal-800 shadow-sm"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   )}
                 >
@@ -79,7 +80,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         </div>
 
         <div className="mt-8 px-3">
-          <p className="mb-2 px-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">Account</p>
+          <p className="mb-2 px-4 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">Account</p>
           <div className="space-y-1">
             {accountNavigation.map(({ label, href, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(`${href}/`);
@@ -89,7 +90,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                   href={href}
                   onClick={onClose}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-colors relative",
+                    "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors relative",
                     isActive 
                       ? "bg-teal-50 font-medium text-teal-700" 
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"

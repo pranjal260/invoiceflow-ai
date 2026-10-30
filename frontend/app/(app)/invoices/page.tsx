@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { FileText, Plus, Search, Pencil, Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { FileText, Plus, Search, Pencil, Trash2, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -17,6 +17,8 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | InvoiceStatus>("ALL");
+  const [directionFilter, setDirectionFilter] = useState<"ALL" | InvoiceDirection>("ALL");
   const [deleting, setDeleting] = useState<Invoice | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -36,8 +38,10 @@ export default function InvoicesPage() {
     void load();
   }, [load]);
 
-  const visible = invoices.filter(i => 
+  const visible = invoices.filter(i =>
     `${i.invoiceNumber} ${i.vendorName}`.toLowerCase().includes(query.toLowerCase())
+    && (statusFilter === "ALL" || i.status === statusFilter)
+    && (directionFilter === "ALL" || i.direction === directionFilter)
   );
 
   async function remove() {
@@ -66,12 +70,12 @@ export default function InvoicesPage() {
             <h1 className="mt-1 text-2xl font-semibold">Invoices</h1>
           </div>
         </div>
-        <Link href="/invoices/new">
-          <Button className="gap-2"><Plus className="h-4 w-4" />New invoice</Button>
-        </Link>
+        <div className="flex flex-wrap gap-2"><Link href="/invoices/new"><Button className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"><Sparkles className="h-4 w-4" />Upload with AI</Button></Link><Link href="/invoices/new"><Button variant="secondary" className="gap-2 rounded-xl"><Plus className="h-4 w-4" />Manual entry</Button></Link></div>
       </div>
-      <div className="mt-6">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <InputSearch value={query} onChange={setQuery} />
+        <select aria-label="Filter invoice status" className="min-h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 focus:border-teal-500 focus:outline-none" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as "ALL" | InvoiceStatus)}><option value="ALL">All statuses</option><option value="PENDING">Pending</option><option value="PAID">Paid</option><option value="OVERDUE">Overdue</option></select>
+        <select aria-label="Filter invoice direction" className="min-h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 focus:border-teal-500 focus:outline-none" value={directionFilter} onChange={(e) => setDirectionFilter(e.target.value as "ALL" | InvoiceDirection)}><option value="ALL">All directions</option><option value="INCOME">Income</option><option value="EXPENSE">Expense</option></select>
       </div>
       {error && (
         <div className="mt-4">
@@ -119,6 +123,7 @@ export default function InvoicesPage() {
     </section>
   );
 }
+
 
 function InputSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
