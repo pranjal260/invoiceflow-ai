@@ -11,17 +11,18 @@ import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { categoryService } from "@/services/category-service";
 import type { Category, Invoice, InvoiceDirection, InvoiceRequest, InvoiceStatus } from "@/types/api";
 
-type Props = { initial?: Invoice; saving: boolean; onSubmit: (request: InvoiceRequest) => Promise<void> };
+type Props = { initial?: Invoice; initialRequest?: InvoiceRequest; saving: boolean; onSubmit: (request: InvoiceRequest) => Promise<void> };
 const blank: InvoiceRequest = { invoiceNumber: "", vendorName: "", invoiceDate: "", dueDate: "", status: "PENDING", subtotal: 0, taxAmount: 0, totalAmount: 0, currency: "INR", notes: "", direction: "EXPENSE" };
 
-export function InvoiceForm({ initial, saving, onSubmit }: Props) {
+export function InvoiceForm({ initial, initialRequest, saving, onSubmit }: Props) {
   const [form, setForm] = useState<InvoiceRequest>(blank);
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { 
-    if (initial) setForm({ categoryId: initial.categoryId ?? undefined, invoiceNumber: initial.invoiceNumber, vendorName: initial.vendorName, invoiceDate: initial.invoiceDate, dueDate: initial.dueDate ?? "", status: initial.status, subtotal: initial.subtotal, taxAmount: initial.taxAmount, totalAmount: initial.totalAmount, currency: initial.currency, notes: initial.notes ?? "", direction: initial.direction }); 
-  }, [initial]);
+    if (initial) setForm({ categoryId: initial.categoryId ?? undefined, invoiceNumber: initial.invoiceNumber, vendorName: initial.vendorName, invoiceDate: initial.invoiceDate, dueDate: initial.dueDate ?? "", status: initial.status, subtotal: initial.subtotal, taxAmount: initial.taxAmount, totalAmount: initial.totalAmount, currency: initial.currency, notes: initial.notes ?? "", direction: initial.direction, fileUrl: initial.fileUrl ?? undefined });
+    else if (initialRequest) setForm(initialRequest);
+  }, [initial, initialRequest]);
 
   useEffect(() => { 
     void categoryService.getCategories().then(setCategories).catch(() => setCategories([])); 

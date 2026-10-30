@@ -60,12 +60,13 @@ Invoice-item operations verify both invoice ownership and item-to-invoice member
 
 | Endpoint | Purpose |
 | --- | --- |
+| `POST /api/invoices/upload` | Uploads a new invoice document and returns AI-extracted data for user review. It does not create or persist an invoice. |
 | `POST /api/invoices/{id}/document` | Uploads or replaces the document attached to an existing invoice. |
 | `GET /api/invoices/{id}/document` | Returns a short-lived presigned URL for the authenticated user to view the invoice document. |
 | `DELETE /api/invoices/{id}/document` | Removes the document attached to an existing invoice. |
 | `POST /api/invoices/{id}/extract` | Runs internal AI extraction against the attached document and updates the invoice and line items with the extracted result. |
 
-AI processing is an internal backend service rather than a separate public AI API. Extraction is available only for an existing, owned invoice with an uploaded document; the backend persists the returned invoice fields and line items as part of that extraction operation.
+AI processing is an internal backend service rather than a separate public AI API. New invoices can be uploaded first, reviewed, edited, and then persisted through `POST /api/invoices` plus the line-item endpoints. Existing invoices can still be re-extracted through `POST /api/invoices/{id}/extract`, which applies the reviewed extraction result to that owned invoice.
 
 ## 8. Dashboard API
 

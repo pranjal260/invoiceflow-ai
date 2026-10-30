@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.invoiceflow.ai.dto.invoice.DocumentResponse;
 import com.invoiceflow.ai.dto.invoice.InvoiceResponse;
+import com.invoiceflow.ai.dto.invoice.InvoiceUploadPreviewResponse;
 import com.invoiceflow.ai.entity.InvoiceStatus;
 import com.invoiceflow.ai.exception.DocumentNotFoundException;
 import com.invoiceflow.ai.exception.EmptyFileException;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,6 +59,24 @@ class InvoiceDocumentSecurityTest {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(delete("/api/invoices/{id}/document", id))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void uploadFirstExtractionReturnsPreviewWithoutCreatingInvoice() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(invoiceService.uploadAndExtract(eq(userId), any(), eq("application/pdf")))
+                .thenReturn(new InvoiceUploadPreviewResponse("INV-AI-001", "Example Vendor",
+                        LocalDate.of(2026, 8, 10), null, new BigDecimal("200.00"),
+                        new BigDecimal("36.00"), new BigDecimal("236.00"), "INR", List.of(),
+                        "invoices/" + userId + "/preview.pdf"));
+
+        mockMvc.perform(multipart("/api/invoices/upload")
+                        .file(pdfFile())
+                        .header("Authorization", token(userId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.invoiceNumber").value("INV-AI-001"))
+                .andExpect(jsonPath("$.fileUrl").value("invoices/" + userId + "/preview.pdf"));
+        verify(invoiceService).uploadAndExtract(eq(userId), any(), eq("application/pdf"));
     }
 
     @Test

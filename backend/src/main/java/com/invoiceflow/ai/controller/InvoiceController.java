@@ -5,6 +5,7 @@ import com.invoiceflow.ai.dto.invoice.InvoiceCreateRequest;
 import com.invoiceflow.ai.dto.invoice.InvoiceResponse;
 import com.invoiceflow.ai.dto.invoice.InvoiceStatusUpdateRequest;
 import com.invoiceflow.ai.dto.invoice.InvoiceUpdateRequest;
+import com.invoiceflow.ai.dto.invoice.InvoiceUploadPreviewResponse;
 import com.invoiceflow.ai.service.InvoiceService;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -50,6 +51,13 @@ public class InvoiceController {
     public InvoiceResponse create(@AuthenticationPrincipal UUID userId,
                                   @Valid @RequestBody InvoiceCreateRequest request) {
         return invoiceService.createInvoice(userId, request);
+    }
+
+    @PostMapping("/upload")
+    public InvoiceUploadPreviewResponse uploadAndExtract(@AuthenticationPrincipal UUID userId,
+                                                          @RequestParam("file") MultipartFile file)
+            throws IOException {
+        return invoiceService.uploadAndExtract(userId, file.getBytes(), file.getContentType());
     }
 
     @PutMapping("/{id}")

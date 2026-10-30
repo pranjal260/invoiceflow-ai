@@ -59,6 +59,20 @@ export type InvoiceRequest = {
   currency: string;
   notes?: string;
   direction: InvoiceDirection;
+  fileUrl?: string;
+};
+
+export type InvoiceUploadPreview = {
+  invoiceNumber: string;
+  vendorName: string;
+  invoiceDate: string;
+  dueDate: string | null;
+  subtotal: number;
+  taxAmount: number;
+  totalAmount: number;
+  currency: string;
+  items: Array<{ description: string; quantity: number; unitPrice: number; amount: number }>;
+  fileUrl: string;
 };
 
 export type InvoiceItem = {

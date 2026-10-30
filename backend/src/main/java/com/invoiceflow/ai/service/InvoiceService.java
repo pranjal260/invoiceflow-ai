@@ -3,6 +3,7 @@ package com.invoiceflow.ai.service;
 import com.invoiceflow.ai.dto.invoice.DocumentResponse;
 import com.invoiceflow.ai.dto.invoice.InvoiceCreateRequest;
 import com.invoiceflow.ai.dto.invoice.InvoiceResponse;
+import com.invoiceflow.ai.dto.invoice.InvoiceUploadPreviewResponse;
 import com.invoiceflow.ai.dto.invoice.InvoiceUpdateRequest;
 import com.invoiceflow.ai.entity.Category;
 import com.invoiceflow.ai.entity.Invoice;
@@ -29,6 +30,7 @@ import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.List;
 import java.util.UUID;
+import java.util.Collections;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,6 +117,35 @@ public class InvoiceService {
         }
 
         return InvoiceMapper.toResponse(saved);
+    }
+
+    /**
+     * Uploads a document and returns an AI preview without creating an invoice.
+     * The caller must review the preview and confirm it through createInvoice.
+     */
+    public InvoiceUploadPreviewResponse uploadAndExtract(UUID userId, byte[] fileBytes, String contentType) {
+        FileUploadResult upload = fileStorageService.upload(fileBytes, contentType, userId);
+        try {
+            InvoiceExtractionResult result = invoiceExtractionService.extract(fileBytes, contentType);
+            validateExtractionResult(result);
+            String currency = normalizeExtractedCurrency(result.currency());
+            List<InvoiceUploadPreviewResponse.InvoiceItemPreview> items = result.items() == null
+                    ? Collections.emptyList()
+                    : result.items().stream().peek(this::validateLineItem)
+                    .map(item -> new InvoiceUploadPreviewResponse.InvoiceItemPreview(
+                            item.description(), item.quantity(), item.unitPrice(), item.amount()))
+                    .toList();
+            return new InvoiceUploadPreviewResponse(result.invoiceNumber(), result.vendorName(),
+                    result.invoiceDate(), result.dueDate(), result.subtotal(), result.taxAmount(),
+                    result.totalAmount(), currency, items, upload.objectKey());
+        } catch (RuntimeException exception) {
+            try {
+                fileStorageService.delete(upload.objectKey());
+            } catch (RuntimeException ignored) {
+                // Preserve the extraction error; cleanup is best effort.
+            }
+            throw exception;
+        }
     }
 
     public DocumentResponse getDocumentUrl(UUID invoiceId, UUID userId) {

@@ -1,10 +1,15 @@
 import { apiClient } from "@/services/api-client";
-import type { DocumentResponse, Invoice, InvoiceItem, InvoiceItemRequest, InvoiceRequest, InvoiceStatus } from "@/types/api";
+import type { DocumentResponse, Invoice, InvoiceItem, InvoiceItemRequest, InvoiceRequest, InvoiceStatus, InvoiceUploadPreview } from "@/types/api";
 
 export const invoiceService = {
   getInvoices: () => apiClient.get<Invoice[]>("/api/invoices"),
   getInvoice: (invoiceId: string) => apiClient.get<Invoice>(`/api/invoices/${invoiceId}`),
   createInvoice: (request: InvoiceRequest) => apiClient.post<Invoice>("/api/invoices", request),
+  uploadAndExtract: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.upload<InvoiceUploadPreview>("/api/invoices/upload", formData);
+  },
   updateInvoice: (invoiceId: string, request: InvoiceRequest) => apiClient.put<Invoice>(`/api/invoices/${invoiceId}`, request),
   deleteInvoice: (invoiceId: string) => apiClient.delete(`/api/invoices/${invoiceId}`),
   updateStatus: (invoiceId: string, status: InvoiceStatus) => apiClient.patch<Invoice>(`/api/invoices/${invoiceId}/status`, { status }),
